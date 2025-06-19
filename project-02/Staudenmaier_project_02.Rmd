@@ -1,0 +1,88 @@
+---
+title: "Mini-Project 02"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+# Data Visualization Project 02
+
+## **Introducrtion**
+
+  For this project I had a difficult time choosing a data set that would allow me to do all three plots at once. Instead, I followed a different approach and decided to choose three different datasets to create each plot so that I would be able to explore the ability of creating a story for each type of plot and data set. The datasets chose to analyze where titled cereal, murders and soccer. The reason behind these picks was that I thought that the first two made a funny pun on the name serial murders, and I enjoy soccer. 
+
+  Below is the section of code that calls upon the different libraries I attempted to use and the three different datasets being called from their website pages.
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(usmap)
+library(ggrepel)
+
+
+cereal <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/main/Cereals.csv")
+murders <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/main/murders_raw.csv")
+soccer <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/main/worldcup.csv")
+```
+
+#### **Plot 1**
+  
+  Let's start with the plot that analyzes a data set cald "cereal".  This data set contains many nutritional facts with various brands of cereals.  For my analysis I decided to make an interactive scatter plot that compared each cereals sugar content to its calories. Luckily none of the data was always missing in these categories so I didn't have to clean up anything. I chose a scatter plot because I wanted to see if there was a direct correlation between high levels of sugar with high calorie count in breakfast cereals. I have sugar plotted along the X and a calorie plotted along the Y. As you hover over each point it will give you the sugar content, calories and brand name of each cereal. Looking at the data there does seem to be a small trend with as sugar increases calories will also increase from just visual inspection it seems like there is more of a hard line that most cereals will have calories of around 110 to 120 on average. I found this very surprising as I thought it would be a more drastic increase in calories as sugar increased. I feel like this plot could be applied to a research survey about health concerns in breakfast foods and an investigation into how breakfast may be the most important meal but can be one of the unhealthiest ones.  I believe that this plot follows the principles of data visualization by keeping it nice and clean and simple and allowing people to understand what's happening at a first glance or a movement of the mouse. Below you can see the created plot.
+
+```{r}
+p <- ggplot(data = cereal, 
+            mapping = aes(x = sugars,
+                          y = calories,
+                          text = name)) +
+  geom_point(color = "red",
+             size = 2) +
+  labs(title = "Sugar vs Calories in Cereals",
+       x = "Sugar (grams)",
+       y = "Calories") +
+  theme_bw()
+
+interact <- ggplotly(p)
+interact
+```
+
+#### **Plot 2**
+  
+  The next plot I created was a spatial visualization plot. I chose to use the data set that was titled “murder” for this. I decided that from the data set I could pull the murder rates from the different states and plot them on a map to compare how each state stacked up with varying murder rates. The reason I chose this data is that I do plan to potentially move to another state to follow my career and I feel like knowing about the areas I might end up would be helpful me on that decision. I took advantage of our studios built in US map library to make plotting easier. I was able to create a map of the United States and fill each state in with its murder rate. I used a gradient in the fill to show that each state had a different rate. The data surprised me a lot in this. I was expecting states like New York Florida and California to have much higher murder rates. Surprisingly Louisiana and Alaska had some of the higher ones just to name two. When I analyze the data more closely it made sense. Something to keep in mind is that the murder rate is based off population as well. So, if you have a high amount of murder and lower population, you'll have a higher rate. This explains Alaska and surprisingly some of the smaller states. I feel like creating additional plots to explore the population versus area of each state would also help drive home this fact. It would do for an interesting study or paper on safe places to live in America. I believe this plot follows the principles of data visualization by making it clean and easy to distinguish each state as well as providing easy understanding of what is being measured here. Below you can see the created plot.
+
+```{r}
+murders <- murders %>%
+  mutate(state = tolower(state))
+
+plot_usmap(data = murders, 
+           values = "murder_rate", 
+           color = "white") +
+  scale_fill_viridis_c(option = "magma", 
+                       name = "Murder Rate") +
+  labs(title = "Murder Rate by State in the U.S.") +
+  theme_bw()
+```
+
+#### **Plot 3**
+
+  For my last plot I decided to analyze a data set that was a little less dark than the last one. I for one enjoy soccer. So, it was only fitting that the next data set I chose was titled "World Cup". I again chose to do a scatter plot because I thought it would be the best way to show a comparison between the time played for each player versus the number of passes each player played in World Cup matches. And the data was interesting to analyze. With time played along the X axis and number of passes along the Yi was able to get a clear distinction that as time progressed the number of passes in each match increased. But you can see clear groupings of straight lines happening in the midpoints of the plot. Upon analysis these straight lines are actually when the end of quarters is happening, and the quickest timed plays are being made. The line groupings after the 4th one are all the players who typically get put in to extended games. And amongst all of these different players there was one who really stood out as an outlier. Labeled in the plot is a player who is considered to be a greatest midfielder for Spain of all time. This player was Xavi Hernández. There were a couple other outliers as well who were also star players. I really enjoyed making this graph as it showed not only who star players were but who were star players with incredible amount of teamwork abilities. I felt that this graph upheld the standards of data visualization as its very neat and precise and could be a steppingstone in a story of analyzing great soccer players. 
+
+```{r}
+outlier <- soccer %>% filter(Passes == max(Passes, na.rm = TRUE))
+ggplot(data = soccer, 
+       mapping = aes(x = Time, 
+                     y = Passes)) +
+  geom_point(color = "green", 
+             alpha = 0.6) +
+  geom_smooth(method = "lm", 
+              color = "blue") +
+  geom_label_repel(data = outlier,
+            aes(label = paste0("A greatest midfielder of all time for ",Team))) +
+  labs(title = "Passes vs Time Played in World Cup Matches",
+       x = "Time Played (minutes)",
+       y = "Number of Passes") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
